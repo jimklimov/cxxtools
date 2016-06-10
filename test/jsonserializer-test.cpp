@@ -109,6 +109,7 @@ class JsonSerializerTest : public cxxtools::unit::TestSuite
             registerMethod("testPlainEmpty", *this, &JsonSerializerTest::testPlainEmpty);
             registerMethod("testEmptyObject", *this, &JsonSerializerTest::testEmptyObject);
             registerMethod("testDirect", *this, &JsonSerializerTest::testDirect);
+            registerMethod("testEmbeddedSpecialChars", *this, &JsonSerializerTest::testEmbeddedSpecialChars);
             registerMethod("testEasyJson", *this, &JsonSerializerTest::testEasyJson);
             registerMethod("testPlainkey", *this, &JsonSerializerTest::testPlainkey);
         }
@@ -281,6 +282,39 @@ class JsonSerializerTest : public cxxtools::unit::TestSuite
 
             CXXTOOLS_UNIT_ASSERT_EQUALS(out.str(), "{\"a\":42,\"jsonData\":{ b: 17; c: \"Hi there\" }}");
 
+        }
+
+        void testEmbeddedSpecialChars()
+        {
+            JsonData j;
+            j.a = 42;
+            j.jsonData = "{ \"b c\": \"There is a \\\"quoted string\\\" in content\"; d: \"Hi\nthere\tTAB\" }";
+
+            std::ostringstream out;
+            cxxtools::JsonSerializer serializer(out);
+            serializer.serialize(j).finish();
+
+            // Special characters like end-of-line, double-quote or TAB should
+            // get escaped upon output of generated JSON markup (single line)
+            CXXTOOLS_UNIT_ASSERT_EQUALS(out.str(), "{\"a\":42,\"jsonData\":{ \"b c\": \"There is a \\\"quoted string\\\" in content\"; d: \"Hi\\nthere\\tTAB\" }}");
+
+            // In this example, escaping of special chars in string contents is
+            // more visible (backslash chars expected in output)
+            TestObject data;
+            data.stringValue = "foobar \"quoted\"\tTAB\nand newline";
+            data.intValue = 17;
+            data.doubleValue = 1.5;
+            data.boolValue = false;
+
+            out << cxxtools::Json(data);
+
+            CXXTOOLS_UNIT_ASSERT_EQUALS(out.str(), "{"
+                "\"intValue\":17,"
+                "\"stringValue\":\"foobar \\\"quoted\\\"\\tTAB\\nand newline\","
+                "\"doubleValue\":1.5,"
+                "\"boolValue\":false,"
+                "\"nullValue\":null"
+                "}");
         }
 
         void testEasyJson()
