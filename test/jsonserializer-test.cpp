@@ -113,6 +113,8 @@ class JsonSerializerTest : public cxxtools::unit::TestSuite
             registerMethod("testPlainkey", *this, &JsonSerializerTest::testPlainkey);
             registerMethod("testEmbeddedSpecialChars", *this, &JsonSerializerTest::testEmbeddedSpecialChars);
             registerMethod("testPlainEmbeddedSpecialChars", *this, &JsonSerializerTest::testPlainEmbeddedSpecialChars);
+            registerMethod("testEmbeddedSpecialCharsExtra", *this, &JsonSerializerTest::testEmbeddedSpecialChars);
+            registerMethod("testPlainEmbeddedSpecialCharsExtra", *this, &JsonSerializerTest::testPlainEmbeddedSpecialChars);
         }
 
         void testInt()
@@ -275,21 +277,20 @@ class JsonSerializerTest : public cxxtools::unit::TestSuite
         {
             JsonData j;
             j.a = 42;
-            j.jsonData = "{ b: 17; c: \"Hi there\" }";
+            j.jsonData = "{ b: 17, c: \"Hi there\" }";
 
             std::ostringstream out;
             cxxtools::JsonSerializer serializer(out);
             serializer.serialize(j).finish();
 
-            CXXTOOLS_UNIT_ASSERT_EQUALS(out.str(), "{\"a\":42,\"jsonData\":{ b: 17; c: \"Hi there\" }}");
-
+            CXXTOOLS_UNIT_ASSERT_EQUALS(out.str(), "{\"a\":42,\"jsonData\":{ b: 17, c: \"Hi there\" }}");
         }
 
         void testEmbeddedSpecialChars()
         {
             JsonData j;
             j.a = 42;
-            j.jsonData = "{ \"b c\": \"There is a \\\"quoted string\\\" in content and\\nan escaped newline\"; d: \"Hi\nthere\tTAB\" }";
+            j.jsonData = "{ \"b c\": \"There is a \\\"quoted string\\\" in content and\\nan escaped newline\", d: \"Hi\nthere\tTAB\" }";
 
             std::ostringstream out;
             cxxtools::JsonSerializer serializer(out);
@@ -297,7 +298,7 @@ class JsonSerializerTest : public cxxtools::unit::TestSuite
 
             // Special characters like end-of-line, double-quote or TAB should
             // get escaped upon output of generated JSON markup (single line)
-            CXXTOOLS_UNIT_ASSERT_EQUALS(out.str(), "{\"a\":42,\"jsonData\":{ \"b c\": \"There is a \\\"quoted string\\\" in content and\\nan escaped newline\"; d: \"Hi\\nthere\\tTAB\" }}");
+            CXXTOOLS_UNIT_ASSERT_EQUALS(out.str(), "{\"a\":42,\"jsonData\":{ \"b c\": \"There is a \\\"quoted string\\\" in content and\\nan escaped newline\", d: \"Hi\\nthere\\tTAB\" }}");
         }
 
         void testPlainEmbeddedSpecialChars()
@@ -318,6 +319,48 @@ class JsonSerializerTest : public cxxtools::unit::TestSuite
             CXXTOOLS_UNIT_ASSERT_EQUALS(out.str(), "{"
                 "\"intValue\":17,"
                 "\"stringValue\":\"foobar \\\"quoted\\\"\\tTAB\\nand newline and\\nan escaped newline\","
+                "\"doubleValue\":1.5,"
+                "\"boolValue\":false,"
+                "\"nullValue\":null"
+                "}");
+        }
+
+        void testEmbeddedSpecialCharsExtra()
+        {
+            JsonData j;
+            j.a = 42;
+            j.jsonData = "{ \"b c\": \"There is a \\\"quoted string\\\" in content and\\nan escaped newline and an \\Xescaped non-json-special char\", d: \"Hi\nthere\tTAB\" }";
+
+            std::ostringstream out;
+            cxxtools::JsonSerializer serializer(out);
+            serializer.serialize(j).finish();
+
+            // Special characters like end-of-line, double-quote or TAB should
+            // get escaped upon output of generated JSON markup (single line)
+            // Also note that '\;' separator in example above (as present in
+            // other tests - so I guess it is a cxxtools relaxed extension)
+            // should become a '\,' standard JSON separator in the end.
+            CXXTOOLS_UNIT_ASSERT_EQUALS(out.str(), "{\"a\":42,\"jsonData\":{ \"b c\": \"There is a \\\"quoted string\\\" in content and\\nan escaped newline and an \\Xescaped non-json-special char\", d: \"Hi\\nthere\\tTAB\" }}");
+        }
+
+        void testPlainEmbeddedSpecialCharsExtra()
+        {
+            // In this example, escaping of special chars in string contents is
+            // more visible (backslash chars expected in output)
+            // Note that bot an EOL character and original '\' 'n' pair should
+            // be represented the same - as text '\' 'n' pair
+            TestObject data;
+            data.stringValue = "foobar \"quoted\"\tTAB\nand newline and\\nan escaped newline and an \\Xescaped non-json-special char";
+            data.intValue = 17;
+            data.doubleValue = 1.5;
+            data.boolValue = false;
+
+            std::ostringstream out;
+            out << cxxtools::Json(data);
+
+            CXXTOOLS_UNIT_ASSERT_EQUALS(out.str(), "{"
+                "\"intValue\":17,"
+                "\"stringValue\":\"foobar \\\"quoted\\\"\\tTAB\\nand newline and\\nan escaped newline and an \\Xescaped non-json-special char\","
                 "\"doubleValue\":1.5,"
                 "\"boolValue\":false,"
                 "\"nullValue\":null"
