@@ -106,6 +106,8 @@ namespace cxxtools
 
         private:
             void indent();
+            void jsonOut(const std::string& str);
+            void jsonOut(const cxxtools::String& str);
             void stringOut(const std::string& str);
             void stringOut(const cxxtools::String& str);
 

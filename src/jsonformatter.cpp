@@ -99,7 +99,7 @@ void JsonFormatter::addValueString(const std::string& name, const std::string& t
         }
         else if (type == "json")
         {
-            *_ts << value;
+            jsonOut(value);
         }
         else if (type == "null")
         {
@@ -135,8 +135,7 @@ void JsonFormatter::addValueStdString(const std::string& name, const std::string
         }
         else if (type == "json")
         {
-            for (std::string::const_iterator it = value.begin(); it != value.end(); ++it)
-                *_ts << Char(*it);
+            jsonOut(value);
         }
         else if (type == "null")
         {
@@ -353,6 +352,17 @@ void JsonFormatter::indent()
 {
     for (unsigned n = 0; n < _level; ++n)
         *_ts << L'\t';
+}
+
+void JsonFormatter::jsonOut(const std::string& jsonStr)
+{
+    for (std::string::const_iterator it = jsonStr.begin(); it != jsonStr.end(); ++it)
+        *_ts << Char(*it);
+}
+
+void JsonFormatter::jsonOut(const String& jsonStr)
+{
+    *_ts << jsonStr;
 }
 
 void JsonFormatter::stringOut(const std::string& str)
