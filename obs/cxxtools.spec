@@ -18,7 +18,7 @@
 
 %define major   9
 Name:           cxxtools
-Version:        2.2.1
+Version:        3.0.0
 Release:        20
 Summary:        Collection of General-purpose C++ Classes
 License:        LGPL-2.1
