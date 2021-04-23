@@ -3,7 +3,7 @@ Section: libs
 Priority: optional
 Maintainer: Kari Pahula <kaol@debian.org>
 Uploaders: Arnaud Quette <aquette@debian.org>
-Build-Depends: libtool, libltdl-dev, dh-autoreconf, cdbs, gettext, libssl-dev, dh-autoreconf, pkg-config, debhelper (>= 9)
+Build-Depends: libtool, libltdl-dev, dh-autoreconf, cdbs, gettext, libssl-dev
 Standards-Version: 3.9.6
 Homepage: http://www.tntnet.org/cxxtools.html
 
