@@ -245,3 +245,8 @@ nobase_include_HEADERS += \
         cxxtools/iconvstream.h \
         cxxtools/iconvwrap.h
 endif
+
+# Temporarily distribute obsoleted header (removed from upstream,
+# but 42ity consumer code has yet to be updated over time)
+nobase_include_HEADERS += \
+        cxxtools/allocator.h
